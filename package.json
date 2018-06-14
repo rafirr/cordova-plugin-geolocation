@@ -1,13 +1,11 @@
 {
   "name": "cordova-plugin-geolocation",
   "version": "4.0.1-dev",
-  "description": "Cordova Geolocation Plugin",
+  "description": "Cordova Geolocation Plugin Android",
   "cordova": {
-    "id": "cordova-plugin-geolocation",
+    "id": "cordova-plugin-geolocation-android",
     "platforms": [
-      "android",
-      "ios",
-      "windows"
+      "android"
     ]
   },
   "repository": {
@@ -21,9 +19,7 @@
     "cordova",
     "geolocation",
     "ecosystem:cordova",
-    "cordova-android",
-    "cordova-ios",
-    "cordova-windows"
+    "cordova-android"
   ],
   "scripts": {
     "test": "npm run eslint",
