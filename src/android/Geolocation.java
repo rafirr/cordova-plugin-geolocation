@@ -196,7 +196,7 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
 			
             request.setInterval(100);
             request.setSmallestDisplacement(0);
-            request.setNumUpdates(10);
+            request.setNumUpdates(4);
             request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         } else {
 			
