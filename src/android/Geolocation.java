@@ -60,7 +60,7 @@ import java.util.Map;
 import javax.security.auth.callback.Callback;
 
 public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteListener<Location> {
-    public final static String TAG = "GeolocationPlugin";
+    public final static String TAG = "GeolocationPluginFixed";
     public final static int PERMISSION_DENIED = 1;
     public final static int POSITION_UNAVAILABLE = 2;
     public final static int REQUEST_LOCATION_ACCURACY_CODE = 235524;
@@ -76,14 +76,27 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
 
     @Override
     protected void pluginInitialize() {
+		
+		LOG.d(TAG, "onPluginInitialize");
+		
         if (hasLocationPermission()) {
+			
+			LOG.d(TAG, "hasLocationPermission");
+			
             initLocationClient();
         } else {
+			
+			LOG.d(TAG, "noPermissions");
+			
             PermissionHelper.requestPermissions(this, 0, permissions);
         }
     }
 
     private void initLocationClient() {
+		
+		LOG.d(TAG, "initLocationClient");
+			
+			
         this.locationManager = (LocationManager) cordova.getActivity().getSystemService(Context.LOCATION_SERVICE);
         this.locationsClient = LocationServices.getFusedLocationProviderClient(cordova.getActivity());
         this.settingsClient = LocationServices.getSettingsClient(cordova.getActivity());
@@ -128,6 +141,8 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
             LocationRequest request = this.requests.get(id);
             LocationCallback callback = this.watchers.get(id);
 
+			LOG.d(TAG, "startPendingListeners " + callback);
+			
             this.locationsClient.requestLocationUpdates(request, callback, Looper.getMainLooper());
         }
 
@@ -139,9 +154,17 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
 
     @CordovaMethod
     private void getLocation(boolean enableHighAccuracy, int maxAge, CallbackContext callbackContext) {
+		
+		LOG.d(TAG, "getLocation");
+		
         if (enableHighAccuracy && isGPSdisabled()) {
+			
+			LOG.d(TAG, "POSITION_UNAVAILABLE");
+			
             callbackContext.error(createErrorResult(POSITION_UNAVAILABLE));
         } else {
+			
+		
             this.locationCallbacks.add(callbackContext);
 
             if (hasLocationPermission()) {
@@ -152,26 +175,41 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
     }
 
     @CordovaMethod
-    private void addWatch(String id, boolean enableHighAccuracy, CallbackContext callbackContext) {
+    private void addWatch(String id, boolean enableHighAccuracy, final CallbackContext callbackContext) {
         LocationRequest request = new LocationRequest();
-
+		
+		LOG.d(TAG, "addWatch");
+		
         if (enableHighAccuracy) {
+			
+			LOG.d(TAG, "enableHighAccuracy");
+			
             if (hasLocationPermission() && isGPSdisabled()) {
+				
+				LOG.d(TAG, "hasLocationPermission, isGPSdisabled");
+				
                 callbackContext.error(createErrorResult(POSITION_UNAVAILABLE));
                 return;
             }
-
-            request.setInterval(5000);
-            request.setSmallestDisplacement(5);
+			
+			LOG.d(TAG, "PRIORITY_HIGH_ACCURACY");
+			
+            request.setInterval(500);
+            request.setSmallestDisplacement(0);
             request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         } else {
+			
+			LOG.d(TAG, "PRIORITY_BALANCED_POWER_ACCURACY");
+			
             request.setInterval(5000);
             request.setSmallestDisplacement(10);
             request.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         }
-
+		
+		
         LocationCallback locationCallback = new LocationCallback() {
-            @Override
+			
+	 
             public void onLocationAvailability(LocationAvailability locationAvailability) {
                 LOG.d(TAG, "onLocationAvailability");
 
@@ -182,12 +220,15 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
                 }
             }
 
-            @Override
+            
             public void onLocationResult(LocationResult result) {
-                LOG.d(TAG, "onLocationResult");
+                LOG.d("GeolocationPluginFixed", "onLocationResult");
 
                 Location location = result.getLastLocation();
                 if (location != null) {
+					
+					LOG.d(TAG, "onLocationResult "+location );
+					
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, createResult(location));
                     pluginResult.setKeepCallback(true);
                     callbackContext.sendPluginResult(pluginResult);
@@ -205,6 +246,9 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
 
     @CordovaMethod
     private void clearWatch(String id, CallbackContext callbackContext) {
+		
+		LOG.d(TAG, "clearWatch" );
+		
         LocationCallback locationCallback = this.watchers.get(id);
         if (locationCallback != null) {
             this.watchers.remove(id);
@@ -217,6 +261,12 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
     }
 
     private boolean isGPSdisabled() {
+		
+		LOG.d(TAG, "GPS_PROVIDER "+this.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+		LOG.d(TAG, "NETWORK_PROVIDER "+this.locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+		LOG.d(TAG, "PASSIVE_PROVIDER "+this.locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER));
+		
+		
         return !this.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
@@ -251,6 +301,8 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
             LOG.d(TAG, "Got last location");
 
             Location location = task.getResult();
+			
+			LOG.d(TAG, "location" + location);
             if (location != null) {
                 JSONObject result = createResult(location);
                 for (CallbackContext callback : this.locationCallbacks) {
