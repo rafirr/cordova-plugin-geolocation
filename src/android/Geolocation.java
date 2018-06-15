@@ -196,7 +196,7 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
 			
             request.setInterval(100);
             request.setSmallestDisplacement(0);
-            request.setNumUpdates(4);
+            request.setNumUpdates(10);
             request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         } else {
 			
@@ -303,8 +303,11 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
 
             Location location = task.getResult();
 			
-			LOG.d(TAG, "location" + location);
+			LOG.d(TAG, "location " + location);
+
             if (location != null) {
+                LOG.d(TAG, "nie pobieramy starej lokalizacji");
+                
                 JSONObject result = createResult(location);
                 for (CallbackContext callback : this.locationCallbacks) {
                     callback.success(result);
