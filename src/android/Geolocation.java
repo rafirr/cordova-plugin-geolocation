@@ -303,7 +303,7 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
 
             Location location = task.getResult();
 			
-			LOG.d(TAG, "location " + location);
+			/*LOG.d(TAG, "location " + location);
 
             if (location != null) {
                 LOG.d(TAG, "nie pobieramy starej lokalizacji");
@@ -313,6 +313,7 @@ public class Geolocation extends ReflectiveCordovaPlugin implements OnCompleteLi
                     callback.success(result);
                 }
             }
+            */
         } else {
             LOG.e(TAG, "Fail to get last location");
 
